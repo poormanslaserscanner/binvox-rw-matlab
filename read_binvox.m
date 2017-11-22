@@ -22,7 +22,12 @@ end
 fid = fopen(binvox_filename);
 fgetl(fid); % '#binvox 1'
 l = fgetl(fid); % e.g. 'dim 64 64 64'
-dims = sscanf(l, 'dim %d %d %d');
+dims0 = sscanf(l, 'dim %d %d %d');
+dims = dims0;
+dims(1) = dims0(2);
+dims(2) = dims0(3);
+dims(3) = dims0(1);
+
 l = fgetl(fid); % e.g. 'translate -1.74325 -0.929973 -1.21382'
 t = sscanf(l, 'translate %f %f %f');
 l = fgetl(fid); % e.g. 'scale 3.48649'
@@ -32,13 +37,13 @@ data = fread(fid);
 fclose(fid);
 
 % create volume
-vol = zeros(dims(:)');
+vol = false(dims(:)');
 k = 1; curr_ind = 0;
 while k < length(data)
     val = data(k);
     len = data(k+1);
     k = k+2;
-    vol(curr_ind+(1:len)) = val;
+    vol(curr_ind+(1:len)) = (val ~= 0);
     curr_ind = curr_ind+len;
 end
 vol = permute(vol,[3 1 2]); %[y x z]
